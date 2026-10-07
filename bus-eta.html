@@ -42,7 +42,18 @@
     color: white;
   }
   .company-tab.kmb.active { background: #d40000; border-color: #d40000; }
-  .company-tab.ctb.active { background: #f5a623; border-color: #f5a623; color: #000; }
+  .company-tab.ctb.active { background: #6e7681; border-color: #6e7681; color: #fff; }
+  .company-tab.disabled { opacity: 0.5; cursor: not-allowed; position: relative; }
+  .company-tab.disabled::after {
+    content: '即將推出';
+    position: absolute;
+    top: 2px;
+    right: 4px;
+    font-size: 9px;
+    background: #f85149;
+    padding: 1px 4px;
+    border-radius: 3px;
+  }
   .search-box {
     display: flex;
     gap: 8px;
@@ -244,7 +255,7 @@
   
   <div class="company-tabs">
     <div class="company-tab kmb active" id="tabKMB" onclick="switchCompany('KMB')">九巴 KMB</div>
-    <div class="company-tab ctb" id="tabCTB" onclick="switchCompany('CTB')">城巴/新巴</div>
+    <div class="company-tab ctb disabled" id="tabCTB" onclick="showCTBNotice()">城巴/新巴</div>
   </div>
   
   <div class="search-box">
@@ -277,6 +288,7 @@ document.getElementById('routeInput').addEventListener('keypress', function(e) {
 });
 
 function switchCompany(company) {
+  if (company === 'CTB') { showCTBNotice(); return; }
   currentCompany = company;
   document.getElementById('tabKMB').classList.toggle('active', company === 'KMB');
   document.getElementById('tabCTB').classList.toggle('active', company === 'CTB');
@@ -284,6 +296,10 @@ function switchCompany(company) {
   document.getElementById('result').innerHTML = '';
   document.getElementById('etaPanel').innerHTML = '';
   if (refreshTimer) { clearInterval(refreshTimer); refreshTimer = null; }
+}
+
+function showCTBNotice() {
+  document.getElementById('result').innerHTML = '<div class="error">城巴/新巴路線查詢功能即將推出<br>目前只支援九巴 KMB 路線</div>';
 }
 
 async function searchRoute() {

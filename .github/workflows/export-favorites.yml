@@ -1,0 +1,35 @@
+name: 同步常用路線到 favorites.json
+
+on:
+  workflow_dispatch:
+    description: 從飛書 Base 讀取常用路線並生成 favorites.json
+
+jobs:
+  export-favorites:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Export favorites from Feishu Base
+        env:
+          LARK_APP_ID: ${{ secrets.LARK_APP_ID }}
+          LARK_APP_SECRET: ${{ secrets.LARK_APP_SECRET }}
+        run: python export_favorites.py
+
+      - name: Commit and push favorites.json
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add favorites.json
+          if git diff --cached --quiet; then
+            echo "favorites.json 沒有變更，跳過提交"
+          else
+            git commit -m "更新常用路線 favorites.json (自動同步)"
+            git push
+          fi

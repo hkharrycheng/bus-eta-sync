@@ -4,6 +4,9 @@ on:
   workflow_dispatch:
     description: 從飛書 Base 讀取常用路線並生成 favorites.json
 
+permissions:
+  contents: write
+
 jobs:
   export-favorites:
     runs-on: ubuntu-latest

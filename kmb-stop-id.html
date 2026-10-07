@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>九巴 Stop ID 查詢工具</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang HK', 'Microsoft YaHei', sans-serif;
+    background: #0d1117;
+    color: #e6edf3;
+    min-height: 100vh;
+    padding: 20px;
+  }
+  .container { max-width: 700px; margin: 0 auto; }
+  h1 {
+    font-size: 22px;
+    margin-bottom: 20px;
+    color: #58a6ff;
+    text-align: center;
+  }
+  .search-box {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  input[type="text"] {
+    flex: 1;
+    padding: 12px 16px;
+    font-size: 16px;
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    color: #e6edf3;
+    outline: none;
+  }
+  input[type="text"]:focus { border-color: #58a6ff; }
+  button {
+    padding: 12px 24px;
+    font-size: 16px;
+    background: #238636;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  button:hover { background: #2ea043; }
+  button:disabled { background: #30363d; cursor: not-allowed; }
+  .direction-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .dir-tab {
+    flex: 1;
+    padding: 10px;
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: center;
+    font-size: 14px;
+  }
+  .dir-tab.active {
+    background: #1f6feb;
+    border-color: #1f6feb;
+    color: white;
+  }
+  .dir-tab .route-name { font-weight: 600; font-size: 15px; }
+  .dir-tab .route-desc { font-size: 12px; opacity: 0.8; margin-top: 2px; }
+  .stop-list { list-style: none; }
+  .stop-item {
+    display: flex;
+    align-items: center;
+    padding: 14px 16px;
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .stop-item:hover {
+    border-color: #58a6ff;
+    background: #1c2128;
+  }
+  .stop-seq {
+    width: 32px;
+    height: 32px;
+    background: #30363d;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 14px;
+    margin-right: 14px;
+    flex-shrink: 0;
+  }
+  .stop-info { flex: 1; min-width: 0; }
+  .stop-name { font-size: 15px; font-weight: 500; margin-bottom: 2px; }
+  .stop-id {
+    font-size: 12px;
+    color: #8b949e;
+    font-family: 'Consolas', monospace;
+    word-break: break-all;
+  }
+  .copy-icon {
+    margin-left: 12px;
+    color: #8b949e;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .stop-item:hover .copy-icon { color: #58a6ff; }
+  .loading {
+    text-align: center;
+    padding: 40px;
+    color: #8b949e;
+  }
+  .error {
+    background: #3d1f1f;
+    border: 1px solid #f85149;
+    color: #f85149;
+    padding: 16px;
+    border-radius: 8px;
+    text-align: center;
+  }
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #238636;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    z-index: 1000;
+  }
+  .toast.show { opacity: 1; }
+  .hint {
+    text-align: center;
+    color: #8b949e;
+    font-size: 13px;
+    margin-top: 16px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🚌 九巴 Stop ID 查詢工具</h1>
+  
+  <div class="search-box">
+    <input type="text" id="routeInput" placeholder="輸入路線號，例如：S1、101、968" />
+    <button onclick="searchRoute()">查詢</button>
+  </div>
+
+  <div id="directionTabs"></div>
+  <div id="result"></div>
+  
+  <div class="hint">點擊車站即可複製 Stop ID，然後貼入飛書 Base</div>
+</div>
+
+<div class="toast" id="toast">已複製 Stop ID！</div>
+
+<script>
+const API_BASE = 'https://data.etabus.gov.hk/v1/transport/kmb';
+let currentDirections = [];
+let currentDirIndex = 0;
+
+document.getElementById('routeInput').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') searchRoute();
+});
+
+async function searchRoute() {
+  const route = document.getElementById('routeInput').value.trim().toUpperCase();
+  if (!route) return;
+  
+  const resultDiv = document.getElementById('result');
+  const tabsDiv = document.getElementById('directionTabs');
+  resultDiv.innerHTML = '<div class="loading">查詢中...</div>';
+  tabsDiv.innerHTML = '';
+  
+  try {
+    // 獲取所有路線，篩選目標路線
+    const res = await fetch(`${API_BASE}/route/`);
+    const data = await res.json();
+    const routes = data.data.filter(r => r.route === route);
+    
+    if (routes.length === 0) {
+      resultDiv.innerHTML = `<div class="error">搵唔到路線「${route}」<br>請檢查路線號是否正確</div>`;
+      return;
+    }
+    
+    currentDirections = routes;
+    currentDirIndex = 0;
+    renderDirectionTabs();
+    loadStops();
+  } catch (err) {
+    resultDiv.innerHTML = `<div class="error">查詢失敗：${err.message}</div>`;
+  }
+}
+
+function renderDirectionTabs() {
+  const tabsDiv = document.getElementById('directionTabs');
+  if (currentDirections.length <= 1) {
+    tabsDiv.innerHTML = '';
+    return;
+  }
+  
+  tabsDiv.innerHTML = currentDirections.map((r, i) => `
+    <div class="dir-tab ${i === currentDirIndex ? 'active' : ''}" onclick="switchDir(${i})">
+      <div class="route-name">${r.bound === 'O' ? '去程' : '回程'}</div>
+      <div class="route-desc">${r.orig_tc} → ${r.dest_tc}</div>
+    </div>
+  `).join('');
+}
+
+function switchDir(index) {
+  currentDirIndex = index;
+  renderDirectionTabs();
+  loadStops();
+}
+
+async function loadStops() {
+  const route = currentDirections[currentDirIndex];
+  const resultDiv = document.getElementById('result');
+  resultDiv.innerHTML = '<div class="loading">載入車站列表...</div>';
+  
+  // bound: O -> outbound, I -> inbound
+  const bound = route.bound === 'O' ? 'outbound' : 'inbound';
+  
+  try {
+    const res = await fetch(`${API_BASE}/route-stop/${route.route}/${bound}/${route.service_type}`);
+    const data = await res.json();
+    
+    if (!data.data || data.data.length === 0) {
+      resultDiv.innerHTML = '<div class="error">呢條路線冇車站資料</div>';
+      return;
+    }
+    
+    // 獲取每個車站名稱
+    const stops = [];
+    for (const item of data.data) {
+      const stopRes = await fetch(`${API_BASE}/stop/${item.stop}`);
+      const stopData = await stopRes.json();
+      stops.push({
+        seq: item.seq,
+        id: item.stop,
+        name: stopData.data.name_tc
+      });
+    }
+    
+    renderStops(stops);
+  } catch (err) {
+    resultDiv.innerHTML = `<div class="error">載入失敗：${err.message}</div>`;
+  }
+}
+
+function renderStops(stops) {
+  const resultDiv = document.getElementById('result');
+  resultDiv.innerHTML = `
+    <ul class="stop-list">
+      ${stops.map(s => `
+        <li class="stop-item" onclick="copyStopId('${s.id}')">
+          <div class="stop-seq">${s.seq}</div>
+          <div class="stop-info">
+            <div class="stop-name">${s.name}</div>
+            <div class="stop-id">${s.id}</div>
+          </div>
+          <div class="copy-icon">📋</div>
+        </li>
+      `).join('')}
+    </ul>
+  `;
+}
+
+function copyStopId(id) {
+  navigator.clipboard.writeText(id).then(() => {
+    showToast();
+  }).catch(() => {
+    // fallback
+    const textarea = document.createElement('textarea');
+    textarea.value = id;
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textarea);
+    showToast();
+  });
+}
+
+function showToast() {
+  const toast = document.getElementById('toast');
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2000);
+}
+</script>
+</body>
+</html>

@@ -42,18 +42,7 @@
     color: white;
   }
   .company-tab.kmb.active { background: #d40000; border-color: #d40000; }
-  .company-tab.ctb.active { background: #6e7681; border-color: #6e7681; color: #fff; }
-  .company-tab.disabled { opacity: 0.5; cursor: not-allowed; position: relative; }
-  .company-tab.disabled::after {
-    content: '即將推出';
-    position: absolute;
-    top: 2px;
-    right: 4px;
-    font-size: 9px;
-    background: #f85149;
-    padding: 1px 4px;
-    border-radius: 3px;
-  }
+  .company-tab.ctb.active { background: #f5a623; border-color: #f5a623; color: #000; }
   .search-box {
     display: flex;
     gap: 8px;
@@ -255,7 +244,7 @@
   
   <div class="company-tabs">
     <div class="company-tab kmb active" id="tabKMB" onclick="switchCompany('KMB')">九巴 KMB</div>
-    <div class="company-tab ctb disabled" id="tabCTB" onclick="showCTBNotice()">城巴/新巴</div>
+    <div class="company-tab ctb" id="tabCTB" onclick="switchCompany('CTB')">城巴/新巴</div>
   </div>
   
   <div class="search-box">
@@ -281,14 +270,14 @@ let selectedStopIndex = -1;
 let refreshTimer = null;
 
 const KMB_API = 'https://data.etabus.gov.hk/v1/transport/kmb';
-const CTB_API = 'https://rt.data.gov.hk/v2/transport/citybus';
+const CTB_API = 'https://rt.data.gov.hk/v1/transport/citybus-nwfb';
+const CTB_BATCH_API = 'https://rt.data.gov.hk/v1/transport/batch';
 
 document.getElementById('routeInput').addEventListener('keypress', function(e) {
   if (e.key === 'Enter') searchRoute();
 });
 
 function switchCompany(company) {
-  if (company === 'CTB') { showCTBNotice(); return; }
   currentCompany = company;
   document.getElementById('tabKMB').classList.toggle('active', company === 'KMB');
   document.getElementById('tabCTB').classList.toggle('active', company === 'CTB');
@@ -296,10 +285,6 @@ function switchCompany(company) {
   document.getElementById('result').innerHTML = '';
   document.getElementById('etaPanel').innerHTML = '';
   if (refreshTimer) { clearInterval(refreshTimer); refreshTimer = null; }
-}
-
-function showCTBNotice() {
-  document.getElementById('result').innerHTML = '<div class="error">城巴/新巴路線查詢功能即將推出<br>目前只支援九巴 KMB 路線</div>';
 }
 
 async function searchRoute() {
@@ -321,7 +306,7 @@ async function searchRoute() {
       const data = await res.json();
       routes = data.data.filter(r => r.route === route);
     } else {
-      const res = await fetch(`${CTB_API}/route/`);
+      const res = await fetch(`${CTB_API}/route/ctb`);
       const data = await res.json();
       routes = data.data.filter(r => r.route === route);
     }
@@ -354,7 +339,7 @@ function renderDirectionTabs() {
     }
     return `
       <div class="dir-tab ${i === currentDirIndex ? 'active' : ''}" onclick="switchDir(${i})">
-        <div class="route-name">${r.direction === 'I' || r.direction === '2' ? '回程' : '去程'}</div>
+        <div class="route-name">${(r.direction === 'I' || r.direction === '2' || r.dir === 'I' || r.bound === 'I') ? '回程' : '去程'}</div>
         <div class="route-desc">${orig} → ${dest}</div>
       </div>
     `;
@@ -381,7 +366,8 @@ async function loadStops() {
       const bound = route.bound === 'O' ? 'outbound' : 'inbound';
       url = `${KMB_API}/route-stop/${route.route}/${bound}/${route.service_type}`;
     } else {
-      url = `${CTB_API}/route-stop/${route.route}/${route.direction}`;
+      const bound = route.dir === 'I' ? 'inbound' : 'outbound';
+      url = `${CTB_API}/route-stop/ctb/${route.route}/${bound}`;
     }
     
     const res = await fetch(url);
@@ -463,13 +449,17 @@ async function loadETA() {
     if (currentCompany === 'KMB') {
       url = `${KMB_API}/eta/${stop.id}/${route.route}/${route.service_type}`;
     } else {
-      url = `${CTB_API}/eta/${stop.id}/${route.route}`;
+      url = `${CTB_BATCH_API}/stop-eta/CTB/${stop.id}`;
     }
     
     const res = await fetch(url);
     const data = await res.json();
     
-    const etas = (data.data || []).filter(e => e.eta).slice(0, 4);
+    let etas = (data.data || []).filter(e => e.eta);
+    if (currentCompany === 'CTB') {
+      etas = etas.filter(e => e.route === route.route && e.dir === route.dir);
+    }
+    etas = etas.slice(0, 4);
     
     if (etas.length === 0) {
       etaDiv.innerHTML = `
@@ -491,11 +481,12 @@ async function loadETA() {
       const diffMin = Math.round(diffMs / 60000);
       const timeStr = etaTime.toLocaleTimeString('zh-HK', { hour: '2-digit', minute: '2-digit' });
       const countdown = diffMin > 0 ? `${diffMin} 分鐘後` : (diffMin === 0 ? '即將到達' : '已過站');
-      const remark = e.rmk_tc || e.remarks_tc || '';
+      const remark = e.rmk_tc || e.remarks_tc || e.rmk || '';
+      const dest = e.dest_tc || e.dest || '';
       return `
         <div class="eta-item">
           <div class="eta-time">${timeStr}</div>
-          <div class="eta-countdown">${countdown}</div>
+          <div class="eta-countdown">${countdown}${dest ? ' · ' + dest : ''}</div>
           <div class="eta-remark">${remark}</div>
         </div>
       `;

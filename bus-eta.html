@@ -308,7 +308,17 @@ async function searchRoute() {
     } else {
       const res = await fetch(`${CTB_API}/route/ctb`);
       const data = await res.json();
-      routes = data.data.filter(r => r.route === route);
+      const matched = data.data.filter(r => r.route === route);
+      // 城巴路線列表唔返回方向，手動建立去程/回程
+      if (matched.length > 0 && !matched[0].dir) {
+        const r = matched[0];
+        routes = [
+          { ...r, dir: 'O', orig_tc: r.orig_tc, dest_tc: r.dest_tc },
+          { ...r, dir: 'I', orig_tc: r.dest_tc, dest_tc: r.orig_tc }
+        ];
+      } else {
+        routes = matched;
+      }
     }
     
     if (routes.length === 0) {

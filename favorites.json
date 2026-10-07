@@ -1,0 +1,32 @@
+[
+  {
+    "company": "CTB",
+    "route": "S56",
+    "stopId": "002710",
+    "stopName": "映灣園四期, 文東路 (S56)",
+    "dir": "O"
+  },
+  {
+    "company": "KMB",
+    "route": "S64P",
+    "stopId": "D7AAC19538A45549",
+    "stopName": "映灣園第二期 (TC160)",
+    "dir": "O",
+    "service_type": "2"
+  },
+  {
+    "company": "KMB",
+    "route": "S64P",
+    "stopId": "18CA599721E67265",
+    "stopName": "國泰城 (CL220)",
+    "dir": "I",
+    "service_type": "2"
+  },
+  {
+    "company": "CTB",
+    "route": "S56",
+    "stopId": "002657",
+    "stopName": "國泰城 (東), 東岸路 (S56)",
+    "dir": "O"
+  }
+]

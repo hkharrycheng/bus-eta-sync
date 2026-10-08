@@ -544,7 +544,12 @@ async function loadFavoritesETA() {
         } else if (fav.company === 'CTB') {
           etas = (data.data || []).filter(e => e.eta && e.route === fav.route && e.dir === fav.dir);
         } else if (fav.company === 'GMB') {
-          etas = (data.data || []).filter(e => e.eta);
+          // 小巴 API：data.data 是數組，每個元素包含 eta 數組
+          for (const item of (data.data || [])) {
+            if (item.eta && Array.isArray(item.eta)) {
+              etas = etas.concat(item.eta);
+            }
+          }
         }
         etas = etas.slice(0, 3);
         
@@ -921,7 +926,12 @@ async function loadETA(index) {
     } else if (currentCompany === 'CTB') {
       etas = (data.data || []).filter(e => e.eta && e.route === route.route && e.dir === route.dir);
     } else if (currentCompany === 'GMB') {
-      etas = (data.data || []).filter(e => e.eta || e.timestamp);
+      // 小巴 API：data.data 是數組，每個元素包含 eta 數組
+      for (const item of (data.data || [])) {
+        if (item.eta && Array.isArray(item.eta)) {
+          etas = etas.concat(item.eta);
+        }
+      }
     }
     etas = etas.slice(0, 4);
     

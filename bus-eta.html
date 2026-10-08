@@ -477,7 +477,7 @@ let FAVORITES = [];
 // 從 favorites.json 載入常用路線
 async function initFavorites() {
   try {
-    const res = await fetch('favorites.json');
+    const res = await fetch('favorites.json?t=' + Date.now());
     if (res.ok) {
       const data = await res.json();
       if (Array.isArray(data) && data.length > 0) {

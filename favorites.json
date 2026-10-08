@@ -22,6 +22,17 @@
         "stop_id":  "D7AAC19538A45549"
     },
     {
+        "direction":  "去程(O)",
+        "company":  "小巴",
+        "service_type":  "1",
+        "route":  "901",
+        "usage":  [
+                      "下班"
+                  ],
+        "stop_name":  "觀景路, 國泰城外",
+        "stop_id":  "20018082"
+    },
+    {
         "direction":  "回程(I)",
         "company":  "城巴",
         "service_type":  "2",

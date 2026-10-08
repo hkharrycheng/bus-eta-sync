@@ -98,6 +98,7 @@
   }
   .fav-company-tag.kmb { background: #d40000; color: white; }
   .fav-company-tag.ctb { background: #f5a623; color: #000; }
+  .fav-company-tag.gmb { background: #2da44e; color: white; }
   .fav-route {
     font-size: 18px;
     font-weight: 700;
@@ -107,6 +108,14 @@
     font-size: 14px;
     color: #e6edf3;
     margin-left: 4px;
+  }
+  .fav-usage {
+    font-size: 11px;
+    color: #8b949e;
+    background: #21262d;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-left: auto;
   }
   .fav-eta-list { list-style: none; }
   .fav-eta-item {
@@ -179,6 +188,7 @@
   }
   .company-tab.kmb.active { background: #d40000; border-color: #d40000; }
   .company-tab.ctb.active { background: #f5a623; border-color: #f5a623; color: #000; }
+  .company-tab.gmb.active { background: #2da44e; border-color: #2da44e; }
   .search-box {
     display: flex;
     gap: 8px;
@@ -425,6 +435,7 @@
     <div class="company-tabs">
       <div class="company-tab kmb active" id="tabKMB" onclick="switchCompany('KMB')">九巴 KMB</div>
       <div class="company-tab ctb" id="tabCTB" onclick="switchCompany('CTB')">城巴/新巴</div>
+      <div class="company-tab gmb" id="tabGMB" onclick="switchCompany('GMB')">小巴 GMB</div>
     </div>
     
     <div class="search-box">
@@ -451,6 +462,7 @@ let favoritesTimer = null;
 const KMB_API = 'https://data.etabus.gov.hk/v1/transport/kmb';
 const CTB_API = 'https://rt.data.gov.hk/v1/transport/citybus-nwfb';
 const CTB_BATCH_API = 'https://rt.data.gov.hk/v1/transport/batch';
+const GMB_API = 'https://data.etagmb.gov.hk';
 
 // ===== 常用路線數據 =====
 // 優先從 favorites.json 讀取（由 GitHub Action 從飛書 Base 同步）
@@ -517,21 +529,28 @@ async function loadFavoritesETA() {
         let url;
         if (fav.company === 'KMB') {
           url = `${KMB_API}/eta/${fav.stopId}/${fav.route}/${fav.service_type || '1'}`;
-        } else {
+        } else if (fav.company === 'CTB') {
           url = `${CTB_BATCH_API}/stop-eta/CTB/${fav.stopId}`;
+        } else if (fav.company === 'GMB') {
+          url = `${GMB_API}/eta/stop/${fav.stopId}`;
         }
         
         const res = await fetch(url);
         const data = await res.json();
         
-        let etas = (data.data || []).filter(e => e.eta);
-        if (fav.company === 'CTB') {
-          etas = etas.filter(e => e.route === fav.route && e.dir === fav.dir);
+        let etas = [];
+        if (fav.company === 'KMB') {
+          etas = (data.data || []).filter(e => e.eta);
+        } else if (fav.company === 'CTB') {
+          etas = (data.data || []).filter(e => e.eta && e.route === fav.route && e.dir === fav.dir);
+        } else if (fav.company === 'GMB') {
+          etas = (data.data || []).filter(e => e.eta);
         }
         etas = etas.slice(0, 3);
         
-        const companyTag = fav.company === 'KMB' ? 'kmb' : 'ctb';
-        const companyName = fav.company === 'KMB' ? '九巴' : '城巴';
+        const companyTag = fav.company === 'KMB' ? 'kmb' : (fav.company === 'CTB' ? 'ctb' : 'gmb');
+        const companyName = fav.company === 'KMB' ? '九巴' : (fav.company === 'CTB' ? '城巴' : '小巴');
+        const usageHtml = fav.usage ? `<span class="fav-usage">${fav.usage}</span>` : '';
         
         if (etas.length === 0) {
           html += `
@@ -540,13 +559,14 @@ async function loadFavoritesETA() {
                 <span class="fav-company-tag ${companyTag}">${companyName}</span>
                 <span class="fav-route">${fav.route}</span>
                 <span class="fav-stop-name">${fav.stopName}</span>
+                ${usageHtml}
               </div>
               <div class="fav-empty">暫無到站數據</div>
             </div>
           `;
         } else {
           const etaHtml = etas.map(e => {
-            const etaTime = new Date(e.eta);
+            const etaTime = new Date(e.eta || e.timestamp);
             const diffMs = etaTime - now;
             const diffMin = Math.round(diffMs / 60000);
             const timeStr = etaTime.toLocaleTimeString('zh-HK', { hour: '2-digit', minute: '2-digit' });
@@ -567,17 +587,20 @@ async function loadFavoritesETA() {
                 <span class="fav-company-tag ${companyTag}">${companyName}</span>
                 <span class="fav-route">${fav.route}</span>
                 <span class="fav-stop-name">${fav.stopName}</span>
+                ${usageHtml}
               </div>
               <div class="fav-eta-list">${etaHtml}</div>
             </div>
           `;
         }
       } catch (err) {
+        const usageHtml = fav.usage ? `<span class="fav-usage">${fav.usage}</span>` : '';
         html += `
           <div class="fav-card">
             <div class="fav-card-header">
               <span class="fav-route">${fav.route}</span>
               <span class="fav-stop-name">${fav.stopName}</span>
+              ${usageHtml}
             </div>
             <div class="fav-error">載入失敗：${err.message}</div>
           </div>
@@ -603,6 +626,7 @@ function switchCompany(company) {
   currentCompany = company;
   document.getElementById('tabKMB').classList.toggle('active', company === 'KMB');
   document.getElementById('tabCTB').classList.toggle('active', company === 'CTB');
+  document.getElementById('tabGMB').classList.toggle('active', company === 'GMB');
   document.getElementById('directionTabs').innerHTML = '';
   document.getElementById('result').innerHTML = '';
   selectedStopIndex = -1;
@@ -626,7 +650,7 @@ async function searchRoute() {
       const res = await fetch(`${KMB_API}/route/`);
       const data = await res.json();
       routes = data.data.filter(r => r.route === route);
-    } else {
+    } else if (currentCompany === 'CTB') {
       const res = await fetch(`${CTB_API}/route/ctb`);
       const data = await res.json();
       const matched = data.data.filter(r => r.route === route);
@@ -638,6 +662,35 @@ async function searchRoute() {
         ];
       } else {
         routes = matched;
+      }
+    } else if (currentCompany === 'GMB') {
+      // 小巴：在三個區域中搜索路線
+      const regions = ['NT', 'KLN', 'HKI'];
+      for (const region of regions) {
+        try {
+          const res = await fetch(`${GMB_API}/route/${region}`);
+          const data = await res.json();
+          if (data.data && data.data.routes && data.data.routes.includes(route)) {
+            // 獲取路線詳情
+            const detailRes = await fetch(`${GMB_API}/route/${region}/${route}`);
+            const detailData = await detailRes.json();
+            if (detailData.data && detailData.data.length > 0) {
+              const routeInfo = detailData.data[0];
+              for (const dir of routeInfo.directions) {
+                routes.push({
+                  route: route,
+                  route_id: routeInfo.route_id,
+                  region: region,
+                  dir: dir.route_seq,
+                  orig_tc: dir.orig_tc,
+                  dest_tc: dir.dest_tc,
+                  service_type: '1'
+                });
+              }
+            }
+            break;
+          }
+        } catch (e) { continue; }
       }
     }
     
@@ -691,40 +744,78 @@ async function loadStops() {
   
   try {
     let url;
+    let stops = [];
+    
     if (currentCompany === 'KMB') {
       const bound = route.bound === 'O' ? 'outbound' : 'inbound';
       url = `${KMB_API}/route-stop/${route.route}/${bound}/${route.service_type}`;
-    } else {
+      const res = await fetch(url);
+      const data = await res.json();
+      
+      if (!data.data || data.data.length === 0) {
+        resultDiv.innerHTML = '<div class="error">呢條路線冇車站資料</div>';
+        return;
+      }
+      
+      for (const item of data.data) {
+        const stopId = item.stop;
+        const seq = item.seq;
+        const stopRes = await fetch(`${KMB_API}/stop/${stopId}`);
+        const stopData = await stopRes.json();
+        const sd = stopData.data;
+        stops.push({
+          seq: seq,
+          id: stopId,
+          name: sd.name_tc || sd.name || '',
+          lat: sd.lat || sd.latitude || '',
+          long: sd.long || sd.longitude || sd.lng || ''
+        });
+      }
+    } else if (currentCompany === 'CTB') {
       const bound = route.dir === 'I' ? 'inbound' : 'outbound';
       url = `${CTB_API}/route-stop/ctb/${route.route}/${bound}`;
-    }
-    
-    const res = await fetch(url);
-    const data = await res.json();
-    
-    if (!data.data || data.data.length === 0) {
-      resultDiv.innerHTML = '<div class="error">呢條路線冇車站資料</div>';
-      return;
-    }
-    
-    const stops = [];
-    for (const item of data.data) {
-      let stopId, seq;
-      if (currentCompany === 'KMB') {
-        stopId = item.stop; seq = item.seq;
-      } else {
-        stopId = item.stop; seq = item.seq || item.stop_seq;
+      const res = await fetch(url);
+      const data = await res.json();
+      
+      if (!data.data || data.data.length === 0) {
+        resultDiv.innerHTML = '<div class="error">呢條路線冇車站資料</div>';
+        return;
       }
-      const stopRes = await fetch(`${currentCompany === 'KMB' ? KMB_API : CTB_API}/stop/${stopId}`);
-      const stopData = await stopRes.json();
-      const sd = stopData.data;
-      stops.push({
-        seq: seq,
-        id: stopId,
-        name: sd.name_tc || sd.name || '',
-        lat: sd.lat || sd.latitude || '',
-        long: sd.long || sd.longitude || sd.lng || ''
-      });
+      
+      for (const item of data.data) {
+        const stopId = item.stop;
+        const seq = item.seq || item.stop_seq;
+        const stopRes = await fetch(`${CTB_API}/stop/${stopId}`);
+        const stopData = await stopRes.json();
+        const sd = stopData.data;
+        stops.push({
+          seq: seq,
+          id: stopId,
+          name: sd.name_tc || sd.name || '',
+          lat: sd.lat || sd.latitude || '',
+          long: sd.long || sd.longitude || sd.lng || ''
+        });
+      }
+    } else if (currentCompany === 'GMB') {
+      // 小巴：用 route_id 和 route_seq 獲取車站
+      url = `${GMB_API}/route-stop/${route.route_id}/${route.dir}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      
+      if (!data.data || !data.data.route_stops || data.data.route_stops.length === 0) {
+        resultDiv.innerHTML = '<div class="error">呢條路線冇車站資料</div>';
+        return;
+      }
+      
+      for (const item of data.data.route_stops) {
+        stops.push({
+          seq: item.stop_seq || item.seq,
+          id: item.stop_id,
+          name: item.name_tc || item.name || '',
+          lat: item.lat || item.latitude || '',
+          long: item.long || item.longitude || item.lng || ''
+        });
+      }
     }
     
     currentStops = stops;
@@ -815,16 +906,22 @@ async function loadETA(index) {
     let url;
     if (currentCompany === 'KMB') {
       url = `${KMB_API}/eta/${stop.id}/${route.route}/${route.service_type}`;
-    } else {
+    } else if (currentCompany === 'CTB') {
       url = `${CTB_BATCH_API}/stop-eta/CTB/${stop.id}`;
+    } else if (currentCompany === 'GMB') {
+      url = `${GMB_API}/eta/stop/${stop.id}`;
     }
     
     const res = await fetch(url);
     const data = await res.json();
     
-    let etas = (data.data || []).filter(e => e.eta);
-    if (currentCompany === 'CTB') {
-      etas = etas.filter(e => e.route === route.route && e.dir === route.dir);
+    let etas = [];
+    if (currentCompany === 'KMB') {
+      etas = (data.data || []).filter(e => e.eta);
+    } else if (currentCompany === 'CTB') {
+      etas = (data.data || []).filter(e => e.eta && e.route === route.route && e.dir === route.dir);
+    } else if (currentCompany === 'GMB') {
+      etas = (data.data || []).filter(e => e.eta || e.timestamp);
     }
     etas = etas.slice(0, 4);
     
@@ -855,7 +952,7 @@ async function loadETA(index) {
     
     const now = new Date();
     const etaHtml = etas.map(e => {
-      const etaTime = new Date(e.eta);
+      const etaTime = new Date(e.eta || e.timestamp);
       const diffMs = etaTime - now;
       const diffMin = Math.round(diffMs / 60000);
       const timeStr = etaTime.toLocaleTimeString('zh-HK', { hour: '2-digit', minute: '2-digit' });

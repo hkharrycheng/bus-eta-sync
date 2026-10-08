@@ -1,6 +1,6 @@
-﻿{
-    "updated_at":  "2026-10-08 20:40:10",
-    "count":  7,
+{
+    "updated_at":  "2026-10-08 20:44:16",
+    "count":  8,
     "favorites":  [
                       {
                           "direction":  "去程(O)",
@@ -58,12 +58,21 @@
                       },
                       {
                           "direction":  "去程(O)",
-                          "company":  "城巴",
+                          "company":  "九巴",
                           "service_type":  "1",
                           "route":  "E36A",
                           "stop_name":  "映灣園第二期 (TC211)",
                           "stop_id":  "D7AAC19538A45549",
                           "remark":  "上大陸"
+                      },
+                      {
+                          "direction":  "去程(O)",
+                          "company":  "九巴",
+                          "service_type":  "1",
+                          "route":  "E36A",
+                          "stop_name":  "紅橋 (TM710)",
+                          "stop_id":  "210978D525EEDF4F",
+                          "remark":  "回HK"
                       }
                   ]
 }

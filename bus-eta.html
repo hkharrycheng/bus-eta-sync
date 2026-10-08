@@ -635,7 +635,7 @@ async function loadFavoritesETA() {
             const diffMin = Math.round(diffMs / 60000);
             const timeStr = etaTime.toLocaleTimeString('zh-HK', { hour: '2-digit', minute: '2-digit' });
             const countdown = diffMin > 0 ? `${diffMin} 分鐘後` : (diffMin === 0 ? '即將到達' : '已過站');
-            const dest = e.dest_tc || e.dest || '';
+            const dest = (e.dest && e.dest.zh) || e.dest_tc || e.dest || '';
             return `
               <div class="fav-eta-item">
                 <div class="fav-eta-time">${timeStr}</div>
@@ -1008,7 +1008,7 @@ async function loadETA(index) {
       const diffMin = Math.round(diffMs / 60000);
       const timeStr = etaTime.toLocaleTimeString('zh-HK', { hour: '2-digit', minute: '2-digit' });
       const countdown = diffMin > 0 ? `${diffMin} 分鐘後` : (diffMin === 0 ? '即將到達' : '已過站');
-      const dest = e.dest_tc || e.dest || '';
+      const dest = (e.dest && e.dest.zh) || e.dest_tc || e.dest || '';
       return `
         <div class="eta-item">
           <div class="eta-time">${timeStr}</div>

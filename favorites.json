@@ -5,9 +5,7 @@
         "company":  "CTB",
         "dir":  "O",
         "route":  "S56",
-        "usage":  [
-                      "上班"
-                  ],
+        "usage":  "上班",
         "service_type":  "1"
     },
     {
@@ -16,9 +14,7 @@
         "company":  "KMB",
         "dir":  "O",
         "route":  "S64P",
-        "usage":  [
-                      "上班"
-                  ],
+        "usage":  "上班",
         "service_type":  "2"
     },
     {
@@ -27,9 +23,7 @@
         "company":  "GMB",
         "dir":  "O",
         "route":  "901",
-        "usage":  [
-                      "下班"
-                  ],
+        "usage":  "下班",
         "service_type":  "1"
     },
     {
@@ -38,9 +32,7 @@
         "company":  "CTB",
         "dir":  "I",
         "route":  "S64P",
-        "usage":  [
-                      "下班"
-                  ],
+        "usage":  "下班",
         "service_type":  "2"
     },
     {
@@ -49,9 +41,7 @@
         "company":  "GMB",
         "dir":  "O",
         "route":  "901",
-        "usage":  [
-                      "上班"
-                  ],
+        "usage":  "上班",
         "service_type":  "1"
     },
     {
@@ -60,9 +50,7 @@
         "company":  "CTB",
         "dir":  "O",
         "route":  "S56",
-        "usage":  [
-                      "下班"
-                  ],
+        "usage":  "下班",
         "service_type":  "2"
     },
     {
@@ -71,9 +59,7 @@
         "company":  "KMB",
         "dir":  "O",
         "route":  "E36A",
-        "usage":  [
-                      "大陸"
-                  ],
+        "usage":  "大陸",
         "service_type":  "1"
     },
     {
@@ -82,9 +68,7 @@
         "company":  "KMB",
         "dir":  "O",
         "route":  "E36A",
-        "usage":  [
-                      "大陸"
-                  ],
+        "usage":  "大陸",
         "service_type":  "1"
     }
 ]

@@ -1,78 +1,74 @@
-{
-    "updated_at":  "2026-10-08 20:44:16",
-    "count":  8,
-    "favorites":  [
-                      {
-                          "direction":  "去程(O)",
-                          "company":  "城巴",
-                          "service_type":  "1",
-                          "route":  "S56",
-                          "stop_name":  "映灣園四期, 文東路 (S56)",
-                          "stop_id":  "002710",
-                          "remark":  "上班"
-                      },
-                      {
-                          "direction":  "去程(O)",
-                          "company":  "九巴",
-                          "service_type":  "2",
-                          "route":  "S64P",
-                          "stop_name":  "映灣園第二期 (TC160)",
-                          "stop_id":  "D7AAC19538A45549",
-                          "remark":  "上班"
-                      },
-                      {
-                          "direction":  "去程(O)",
-                          "company":  "小巴",
-                          "service_type":  "1",
-                          "route":  "901",
-                          "stop_name":  "文東路, 映灣園三期第十一座外",
-                          "stop_id":  "20007565",
-                          "remark":  "上班 + 下班"
-                      },
-                      {
-                          "direction":  "回程(I)",
-                          "company":  "城巴",
-                          "service_type":  "2",
-                          "route":  "S64P",
-                          "stop_name":  "國泰城 (CL220)",
-                          "stop_id":  "18CA599721E67265",
-                          "remark":  "下班"
-                      },
-                      {
-                          "direction":  "去程(O)",
-                          "company":  "小巴",
-                          "service_type":  "1",
-                          "route":  "901",
-                          "stop_name":  "文東路, 映灣園二期第八座外",
-                          "stop_id":  "20007566",
-                          "remark":  "上班 + 下班"
-                      },
-                      {
-                          "direction":  "去程(O)",
-                          "company":  "城巴",
-                          "service_type":  "2",
-                          "route":  "S56",
-                          "stop_name":  "國泰城 (東), 東岸路 (S56)",
-                          "stop_id":  "002657",
-                          "remark":  "下班"
-                      },
-                      {
-                          "direction":  "去程(O)",
-                          "company":  "九巴",
-                          "service_type":  "1",
-                          "route":  "E36A",
-                          "stop_name":  "映灣園第二期 (TC211)",
-                          "stop_id":  "D7AAC19538A45549",
-                          "remark":  "上大陸"
-                      },
-                      {
-                          "direction":  "去程(O)",
-                          "company":  "九巴",
-                          "service_type":  "1",
-                          "route":  "E36A",
-                          "stop_name":  "紅橋 (TM710)",
-                          "stop_id":  "210978D525EEDF4F",
-                          "remark":  "回HK"
-                      }
-                  ]
-}
+[
+    {
+        "direction":  "去程(O)",
+        "company":  "城巴",
+        "service_type":  "1",
+        "route":  "S56",
+        "usage":  "上班",
+        "stop_name":  "映灣園四期, 文東路 (S56)",
+        "stop_id":  "002710"
+    },
+    {
+        "direction":  "去程(O)",
+        "company":  "九巴",
+        "service_type":  "2",
+        "route":  "S64P",
+        "usage":  "上班",
+        "stop_name":  "映灣園第二期 (TC160)",
+        "stop_id":  "D7AAC19538A45549"
+    },
+    {
+        "direction":  "去程(O)",
+        "company":  "小巴",
+        "service_type":  "1",
+        "route":  "901",
+        "usage":  "上班 + 下班",
+        "stop_name":  "文東路, 映灣園三期第十一座外",
+        "stop_id":  "20007565"
+    },
+    {
+        "direction":  "回程(I)",
+        "company":  "城巴",
+        "service_type":  "2",
+        "route":  "S64P",
+        "usage":  "下班",
+        "stop_name":  "國泰城 (CL220)",
+        "stop_id":  "18CA599721E67265"
+    },
+    {
+        "direction":  "去程(O)",
+        "company":  "小巴",
+        "service_type":  "1",
+        "route":  "901",
+        "usage":  "上班",
+        "stop_name":  "文東路, 映灣園二期第八座外",
+        "stop_id":  "20007566"
+    },
+    {
+        "direction":  "去程(O)",
+        "company":  "城巴",
+        "service_type":  "2",
+        "route":  "S56",
+        "usage":  "下班",
+        "stop_name":  "國泰城 (東), 東岸路 (S56)",
+        "stop_id":  "002657"
+    },
+    {
+        "direction":  "去程(O)",
+        "company":  "九巴",
+        "service_type":  "1",
+        "route":  "E36A",
+        "usage":  "大陸",
+        "stop_name":  "映灣園第二期 (TC211)",
+        "stop_id":  "D7AAC19538A45549"
+    },
+    {
+        "direction":  "去程(O)",
+        "company":  "九巴",
+        "service_type":  "1",
+        "route":  "E36A",
+        "usage":  "大陸",
+        "stop_name":  "紅橋 (TM710)",
+        "stop_id":  "210978D525EEDF4F"
+    }
+]

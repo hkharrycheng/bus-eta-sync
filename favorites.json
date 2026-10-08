@@ -63,10 +63,10 @@
         "service_type":  "1"
     },
     {
-        "stopName":  "紅橋 (TM134)",
-        "stopId":  "D9B82EE66AFF2975",
+        "stopName":  "紅橋 (TM710)",
+        "stopId":  "210978D525EEDF4F",
         "company":  "KMB",
-        "dir":  "I",
+        "dir":  "O",
         "route":  "E36A",
         "usage":  "大陸",
         "service_type":  "1"

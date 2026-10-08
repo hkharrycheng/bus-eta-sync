@@ -57,16 +57,16 @@
         "stopName":  "映灣園第二期 (TC211)",
         "stopId":  "D7AAC19538A45549",
         "company":  "KMB",
-        "dir":  "O",
+        "dir":  "I",
         "route":  "E36A",
         "usage":  "大陸",
         "service_type":  "1"
     },
     {
-        "stopName":  "紅橋 (TM710)",
-        "stopId":  "210978D525EEDF4F",
+        "stopName":  "紅橋 (TM134)",
+        "stopId":  "D9B82EE66AFF2975",
         "company":  "KMB",
-        "dir":  "O",
+        "dir":  "I",
         "route":  "E36A",
         "usage":  "大陸",
         "service_type":  "1"

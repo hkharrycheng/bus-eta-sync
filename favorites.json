@@ -1,74 +1,115 @@
-[
-  {
-    "route": "S56",
-    "company": "城巴",
-    "stop_name": "映灣園四期, 文東路 (S56)",
-    "usage": "上班",
-    "service_type": "1",
-    "stop_id": "002710",
-    "direction": "去程(O)"
-  },
-  {
-    "route": "901",
-    "company": "小巴",
-    "stop_name": "觀景路, 國泰城外",
-    "usage": "下班",
-    "service_type": "1",
-    "stop_id": "20018082",
-    "direction": "去程(O)"
-  },
-  {
-    "route": "901",
-    "company": "小巴",
-    "stop_name": "文東路, 映灣園二期第八座外",
-    "usage": "上班",
-    "service_type": "1",
-    "stop_id": "20007566",
-    "direction": "去程(O)"
-  },
-  {
-    "route": "S56",
-    "company": "城巴",
-    "stop_name": "國泰城 (東), 東岸路 (S56)",
-    "usage": "下班",
-    "service_type": "2",
-    "stop_id": "002657",
-    "direction": "去程(O)"
-  },
-  {
-    "route": "E36A",
-    "company": "九巴",
-    "stop_name": "映灣園第二期 (TC211)",
-    "usage": "大陸",
-    "service_type": "1",
-    "stop_id": "7DF092F3A5418694",
-    "direction": "回程(I)"
-  },
-  {
-    "route": "E36A",
-    "company": "九巴",
-    "stop_name": "紅橋 (TM710)",
-    "usage": "大陸",
-    "service_type": "1",
-    "stop_id": "210978D525EEDF4F",
-    "direction": "去程(O)"
-  },
-  {
-    "route": "S64P",
-    "company": "九巴",
-    "stop_name": "映灣園第二期 (TC160)",
-    "usage": "上班",
-    "service_type": "1",
-    "stop_id": "D7AAC19538A45549",
-    "direction": "去程(O)"
-  },
-  {
-    "route": "S64P",
-    "company": "九巴",
-    "stop_name": "國泰城 (CL220)",
-    "usage": "下班",
-    "service_type": "1",
-    "stop_id": "18CA599721E67265",
-    "direction": "去程(O)"
-  }
-]
+{
+  "version": "1.0",
+  "updated_at": "2026-10-09T15:40:00+08:00",
+  "count": 12,
+  "favorites": [
+    {
+      "route": "S56",
+      "company": "城巴",
+      "stop_name": "映灣園四期, 文東路 (S56)",
+      "usage": "上班",
+      "service_type": "1",
+      "stop_id": "002710",
+      "direction": "O"
+    },
+    {
+      "route": "901",
+      "company": "小巴",
+      "stop_name": "觀景路, 國泰城外",
+      "usage": "下班",
+      "service_type": "1",
+      "stop_id": "20018082",
+      "direction": "O"
+    },
+    {
+      "route": "901",
+      "company": "小巴",
+      "stop_name": "文東路, 映灣園二期第八座外",
+      "usage": "上班",
+      "service_type": "1",
+      "stop_id": "20007566",
+      "direction": "O"
+    },
+    {
+      "route": "S56",
+      "company": "城巴",
+      "stop_name": "國泰城 (東), 東岸路 (S56)",
+      "usage": "下班",
+      "service_type": "2",
+      "stop_id": "002657",
+      "direction": "O"
+    },
+    {
+      "route": "E36A",
+      "company": "九巴",
+      "stop_name": "映灣園第二期 (TC211)",
+      "usage": "大陸",
+      "service_type": "1",
+      "stop_id": "7DF092F3A5418694",
+      "direction": "I"
+    },
+    {
+      "route": "E36A",
+      "company": "九巴",
+      "stop_name": "紅橋 (TM710)",
+      "usage": "大陸",
+      "service_type": "1",
+      "stop_id": "210978D525EEDF4F",
+      "direction": "O"
+    },
+    {
+      "route": "S64P",
+      "company": "九巴",
+      "stop_name": "映灣園第二期 (TC160)",
+      "usage": "上班",
+      "service_type": "1",
+      "stop_id": "D7AAC19538A45549",
+      "direction": "O"
+    },
+    {
+      "route": "S64P",
+      "company": "九巴",
+      "stop_name": "國泰城 (CL220)",
+      "usage": "下班",
+      "service_type": "1",
+      "stop_id": "18CA599721E67265",
+      "direction": "O"
+    },
+    {
+      "route": "E21",
+      "company": "城巴",
+      "stop_name": "國泰城, 駿明路",
+      "usage": "打波",
+      "service_type": "1",
+      "stop_id": "001845",
+      "direction": "I"
+    },
+    {
+      "route": "E21D",
+      "company": "城巴",
+      "stop_name": "美孚, 長沙灣道",
+      "usage": "打波",
+      "service_type": "1",
+      "stop_id": "001435",
+      "direction": "I"
+    },
+    {
+      "route": "E32A",
+      "company": "九巴",
+      "stop_name": "映灣園第二期 (TC211)",
+      "usage": "荃灣",
+      "service_type": "1",
+      "stop_id": "7DF092F3A5418694",
+      "direction": "I"
+    },
+    {
+      "route": "E32A",
+      "company": "九巴",
+      "stop_name": "川龍街 (TW262)",
+      "usage": "荃灣",
+      "service_type": "1",
+      "stop_id": "6328BFDC78246772",
+      "direction": "O"
+    }
+  ]
+}

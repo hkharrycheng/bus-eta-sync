@@ -104,6 +104,35 @@
     border-radius: 10px;
     margin-left: auto;
   }
+  /* ===== Tag 分組 ===== */
+  .fav-group {
+    margin-bottom: 16px;
+  }
+  .fav-group-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: linear-gradient(135deg, #21262d 0%, #161b22 100%);
+    border-left: 3px solid #f5a623;
+    border-radius: 6px;
+    margin-bottom: 10px;
+  }
+  .fav-group-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #f5a623;
+  }
+  .fav-group-count {
+    font-size: 11px;
+    color: #8b949e;
+    background: #30363d;
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+  .fav-group .fav-card {
+    margin-left: 8px;
+  }
   /* ===== Tag 篩選 ===== */
   .tag-filter {
     display: flex;
@@ -508,7 +537,9 @@ function initTagFilter() {
     }
   }
   allTags = Array.from(tagSet);
-  activeTags = new Set(allTags); // 預設全部顯示
+  // 預設只 TOGGLE ON "上班"同"下班" Tag，其他 Tag 預設隱藏
+  const DEFAULT_TAGS = ['上班', '下班'];
+  activeTags = new Set(allTags.filter(tag => DEFAULT_TAGS.includes(tag)));
 
   renderTagFilter();
 }
@@ -577,100 +608,126 @@ async function loadFavoritesETA() {
     const now = new Date();
     let html = '';
 
+    // 按 Tag 分組
+    const groups = new Map();
     for (const fav of FAVORITES) {
       // Tag 篩選：如果有 usage 且唔在 activeTags 中，跳過
       if (fav.usage && !activeTags.has(fav.usage)) {
         continue;
       }
+      const tag = fav.usage || '其他';
+      if (!groups.has(tag)) {
+        groups.set(tag, []);
+      }
+      groups.get(tag).push(fav);
+    }
 
-      try {
-        let url;
-        if (fav.company === 'KMB') {
-          url = `${KMB_API}/eta/${fav.stopId}/${fav.route}/${fav.service_type || '1'}`;
-        } else if (fav.company === 'CTB') {
-          url = `${CTB_BATCH_API}/stop-eta/CTB/${fav.stopId}`;
-        } else if (fav.company === 'GMB') {
-          url = `${GMB_API}/eta/stop/${fav.stopId}`;
-        }
+    // 按 Tag 順序顯示（優先顯示 activeTags 中的順序）
+    const sortedTags = [...groups.keys()].sort((a, b) => {
+      const aIdx = allTags.indexOf(a);
+      const bIdx = allTags.indexOf(b);
+      if (aIdx === -1 && bIdx === -1) return a.localeCompare(b);
+      if (aIdx === -1) return 1;
+      if (bIdx === -1) return -1;
+      return aIdx - bIdx;
+    });
 
-        const res = await fetch(url);
-        const data = await res.json();
+    for (const tag of sortedTags) {
+      const favs = groups.get(tag);
+      html += `<div class="fav-group">`;
+      html += `<div class="fav-group-header"><span class="fav-group-title">${tag}</span><span class="fav-group-count">${favs.length} 個站</span></div>`;
 
-        let etas = [];
-        if (fav.company === 'KMB') {
-          // 九巴：按方向過濾
-          etas = (data.data || []).filter(e => e.eta && e.dir === fav.dir);
-        } else if (fav.company === 'CTB') {
-          etas = (data.data || []).filter(e => e.eta && e.route === fav.route && e.dir === fav.dir);
-        } else if (fav.company === 'GMB') {
-          // 小巴 API：data.data 是數組，每個元素包含 eta 數組
-          for (const item of (data.data || [])) {
-            if (item.eta && Array.isArray(item.eta)) {
-              etas = etas.concat(item.eta);
+      for (const fav of favs) {
+        try {
+          let url;
+          if (fav.company === 'KMB') {
+            url = `${KMB_API}/eta/${fav.stopId}/${fav.route}/${fav.service_type || '1'}`;
+          } else if (fav.company === 'CTB') {
+            url = `${CTB_BATCH_API}/stop-eta/CTB/${fav.stopId}`;
+          } else if (fav.company === 'GMB') {
+            url = `${GMB_API}/eta/stop/${fav.stopId}`;
+          }
+
+          const res = await fetch(url);
+          const data = await res.json();
+
+          let etas = [];
+          if (fav.company === 'KMB') {
+            // 九巴：按方向過濾
+            etas = (data.data || []).filter(e => e.eta && e.dir === fav.dir);
+          } else if (fav.company === 'CTB') {
+            etas = (data.data || []).filter(e => e.eta && e.route === fav.route && e.dir === fav.dir);
+          } else if (fav.company === 'GMB') {
+            // 小巴 API：data.data 是數組，每個元素包含 eta 數組
+            for (const item of (data.data || [])) {
+              if (item.eta && Array.isArray(item.eta)) {
+                etas = etas.concat(item.eta);
+              }
             }
           }
-        }
-        etas = etas.slice(0, 3);
+          etas = etas.slice(0, 3);
 
-        const companyTag = fav.company === 'KMB' ? 'kmb' : (fav.company === 'CTB' ? 'ctb' : 'gmb');
-        const companyName = fav.company === 'KMB' ? '九巴' : (fav.company === 'CTB' ? '城巴' : '小巴');
-        const usageHtml = fav.usage ? `<span class="fav-usage">${fav.usage}</span>` : '';
+          const companyTag = fav.company === 'KMB' ? 'kmb' : (fav.company === 'CTB' ? 'ctb' : 'gmb');
+          const companyName = fav.company === 'KMB' ? '九巴' : (fav.company === 'CTB' ? '城巴' : '小巴');
 
-        if (etas.length === 0) {
-          html += `
-            <div class="fav-card">
-              <div class="fav-card-header">
-                <span class="fav-company-tag ${companyTag}">${companyName}</span>
-                <span class="fav-route">${fav.route}</span>
-                <span class="fav-stop-name">${fav.stopName}</span>
-                ${usageHtml}
-              </div>
-              <div class="fav-empty">暫無到站數據</div>
-            </div>
-          `;
-        } else {
-          const etaHtml = etas.map(e => {
-            const etaTime = new Date(e.eta || e.timestamp);
-            const diffMs = etaTime - now;
-            const diffMin = Math.round(diffMs / 60000);
-            const timeStr = etaTime.toLocaleTimeString('zh-HK', { hour: '2-digit', minute: '2-digit' });
-            const countdown = diffMin > 0 ? `${diffMin} 分鐘後` : (diffMin === 0 ? '即將到達' : '已過站');
-            let dest = (e.dest && e.dest.zh) || e.dest_tc || (typeof e.dest === 'string' ? e.dest : '');
-            if (!dest && fav) dest = fav.dir === 'I' ? '元朗(德業街)' : '東涌(逸東)';
-            return `
-              <div class="fav-eta-item">
-                <div class="fav-eta-time">${timeStr}</div>
-                <div class="fav-eta-countdown">${countdown}</div>
-                <div class="fav-eta-dest">${dest}</div>
+          if (etas.length === 0) {
+            html += `
+              <div class="fav-card">
+                <div class="fav-card-header">
+                  <span class="fav-company-tag ${companyTag}">${companyName}</span>
+                  <span class="fav-route">${fav.route}</span>
+                  <span class="fav-stop-name">${fav.stopName}</span>
+                </div>
+                <div class="fav-empty">暫無到站數據</div>
               </div>
             `;
-          }).join('');
+          } else {
+            const etaHtml = etas.map(e => {
+              const etaTime = new Date(e.eta || e.timestamp);
+              const diffMs = etaTime - now;
+              const diffMin = Math.round(diffMs / 60000);
+              const timeStr = etaTime.toLocaleTimeString('zh-HK', { hour: '2-digit', minute: '2-digit' });
+              const countdown = diffMin > 0 ? `${diffMin} 分鐘後` : (diffMin === 0 ? '即將到達' : '已過站');
+              let dest = (e.dest && e.dest.zh) || e.dest_tc || (typeof e.dest === 'string' ? e.dest : '');
+              if (!dest && fav) dest = fav.dir === 'I' ? '元朗(德業街)' : '東涌(逸東)';
+              return `
+                <div class="fav-eta-item">
+                  <div class="fav-eta-time">${timeStr}</div>
+                  <div class="fav-eta-countdown">${countdown}</div>
+                  <div class="fav-eta-dest">${dest}</div>
+                </div>
+              `;
+            }).join('');
 
+            html += `
+              <div class="fav-card">
+                <div class="fav-card-header">
+                  <span class="fav-company-tag ${companyTag}">${companyName}</span>
+                  <span class="fav-route">${fav.route}</span>
+                  <span class="fav-stop-name">${fav.stopName}</span>
+                </div>
+                <div class="fav-eta-list">${etaHtml}</div>
+              </div>
+            `;
+          }
+        } catch (err) {
           html += `
             <div class="fav-card">
               <div class="fav-card-header">
-                <span class="fav-company-tag ${companyTag}">${companyName}</span>
                 <span class="fav-route">${fav.route}</span>
                 <span class="fav-stop-name">${fav.stopName}</span>
-                ${usageHtml}
               </div>
-              <div class="fav-eta-list">${etaHtml}</div>
+              <div class="fav-error">載入失敗：${err.message}</div>
             </div>
           `;
         }
-      } catch (err) {
-        const usageHtml = fav.usage ? `<span class="fav-usage">${fav.usage}</span>` : '';
-        html += `
-          <div class="fav-card">
-            <div class="fav-card-header">
-              <span class="fav-route">${fav.route}</span>
-              <span class="fav-stop-name">${fav.stopName}</span>
-              ${usageHtml}
-            </div>
-            <div class="fav-error">載入失敗：${err.message}</div>
-          </div>
-        `;
       }
+
+      html += `</div>`;
+    }
+
+    if (sortedTags.length === 0) {
+      html = '<div class="fav-empty">沒有符合篩選條件的常用路線</div>';
     }
 
     content.innerHTML = html;

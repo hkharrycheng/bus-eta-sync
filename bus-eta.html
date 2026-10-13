@@ -20,6 +20,20 @@
     color: #58a6ff;
     text-align: center;
   }
+  .logo-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .logo-bar .logo-img {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    object-fit: contain;
+    flex-shrink: 0;
+  }
   /* ===== 頂部按鈕列 ===== */
   .top-bar {
     display: flex;
@@ -449,7 +463,7 @@
 </head>
 <body>
 <div class="container">
-  <h1>🚌 香港巴士到站查詢</h1>
+  <div class="logo-bar"><img class="logo-img" src="logo.png" alt="HIS Tools"><h1 style="margin-bottom:0">香港巴士到站查詢</h1></div>
   <!-- ===== 頂部按鈕列 ===== -->
   <div class="top-bar">
     <div class="top-btn favorites-btn" onclick="showFavorites()">⭐ 常用路線</div>
@@ -1097,8 +1111,5 @@ async function loadETA(index) {
   }
 }
 </script>
-
-<footer style="text-align:center; padding:20px; color:#888; font-size:12px; border-top:1px solid #333; margin-top:30px;">
-  HIS Tools © 2026.1.01
-</footer></body>
+</body>
 </html>

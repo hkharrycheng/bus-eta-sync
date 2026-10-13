@@ -539,4 +539,4 @@ A: HTML 頁面每 30 秒自動刷新到站時間。常用路線數據 (`favorite
 MIT License
 
 ## Version Control
-- v2.01 (2026-10-13): header 改用圖標相片 LOGO（移除 🚌 emoji）
+- v2.02 (2026-10-13): 恢復 v2.01 功能 + 重套圖標相片 LOGO（修復倒退）

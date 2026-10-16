@@ -12,7 +12,7 @@
     "route": "901",
     "company": "GMB",
     "stopName": "觀景路, 國泰城外",
-    "usage": "下班",
+    "usage": "下班P1",
     "service_type": "1",
     "stopId": "20018082",
     "dir": "O"
@@ -30,7 +30,7 @@
     "route": "S56",
     "company": "CTB",
     "stopName": "國泰城 (東), 東岸路 (S56)",
-    "usage": "下班",
+    "usage": "下班P1",
     "service_type": "2",
     "stopId": "002657",
     "dir": "O"
@@ -66,7 +66,7 @@
     "route": "S64P",
     "company": "KMB",
     "stopName": "國泰城 (CL220)",
-    "usage": "下班",
+    "usage": "下班P1",
     "service_type": "1",
     "stopId": "18CA599721E67265",
     "dir": "O"
@@ -111,7 +111,7 @@
     "route": "S56",
     "company": "CTB",
     "stopName": "國泰城 (東), 東岸路",
-    "usage": "下班",
+    "usage": "下班P1",
     "service_type": "1",
     "stopId": "002657",
     "dir": "O"
@@ -120,7 +120,7 @@
     "route": "S64P",
     "company": "KMB",
     "stopName": "國泰城 (CL341)",
-    "usage": "下班",
+    "usage": "下班P1",
     "service_type": "1",
     "stopId": "31418DC3F19236BF",
     "dir": "O"
@@ -129,7 +129,7 @@
     "route": "S52",
     "company": "CTB",
     "stopName": "國泰城, 駿明路",
-    "usage": "下班",
+    "usage": "下班P2",
     "service_type": "1",
     "stopId": "001845",
     "dir": "O"
@@ -138,7 +138,7 @@
     "route": "S64",
     "company": "KMB",
     "stopName": "國泰城 (CL220)",
-    "usage": "下班",
+    "usage": "下班P2",
     "service_type": "1",
     "stopId": "18CA599721E67265",
     "dir": "O"
@@ -147,7 +147,7 @@
     "route": "S64X",
     "company": "KMB",
     "stopName": "國泰城 (CL220)",
-    "usage": "下班",
+    "usage": "下班P2",
     "service_type": "1",
     "stopId": "18CA599721E67265",
     "dir": "O"

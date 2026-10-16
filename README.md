@@ -316,13 +316,14 @@
 
 | 字段 | 類型 | 說明 | 範例 |
 |------|------|------|------|
-| `route` | string | 路線號 | `"S56"`, `"901"` |
-| `stopName` | string | 車站名稱（中文） | `"映灣園四期, 文東路"` |
-| `company` | string | 巴士公司 | `"KMB"` / `"CTB"` / `"GMB"` |
-| `usage` | string | 用法標籤（用於篩選） | `"上班"`, `"下班"`, `"大陸用"` |
-| `stopId` | string | 車站 ID | `"BA04195A105130"` |
+| `route` | string | 路線號 | `"S56"`, `"901"`, `"Shuttle"` |
+| `stopName` | string | 車站名稱（中文） | `"映灣園四期, 文東路"`, `"3號站"` |
+| `company` | string | 巴士公司 | `"KMB"` / `"CTB"` / `"GMB"` / `"RES"` |
+| `usage` | string | 用法標籤（用於篩選） | `"上班"`, `"下班P1"`, `"村巴"` |
+| `stopId` | string | 車站 ID（村巴為 null） | `"BA04195A105130"` |
 | `dir` | string | 方向 | 九巴：`"O"`/`"I"`，城巴：`"1"`/`"2"`，小巴：`"1"` |
-| `service_type` | string | 服務類型 | `"1"`（通常為 1） |
+| `service_type` | string | 服務類型 | `"1"`（通常為 1），村巴為 null |
+| `timetable` | object | 定時時間表（僅村巴 RES 有，HTML 計「而家之後3班」） | `{"工作日(Mon-Fri)":["0700",...],"週末公假(Sat/Sun/PH)":[...]}` |
 
 #### company 枚舉值
 
@@ -331,6 +332,7 @@
 | `KMB` | 九巴 | 紅色 |
 | `CTB` | 城巴/新巴 | 橙色 |
 | `GMB` | 小巴 | 綠色 |
+| `RES` | 住戶村巴（定時時間表，無 API） | 紫色 |
 
 ---
 
@@ -456,10 +458,17 @@ Base: 巴士實時到站 (An0abQoUBalSqJsG66ucDzT3ncg)
 │   ├── 路線 (text)
 │   ├── 車站名 (text)
 │   ├── 巴士公司 (select: 城巴/九巴/小巴)
-│   ├── 用法 (select: 上班/下班/上班 + 下班/大陸用)
+│   ├── 用法 (select: 上班/下班P1/下班P2/大陸/打波/荃灣)
 │   ├── Stop ID (text)
 │   ├── 方向 (text)
 │   └── service_type (text)
+├── 恒常時間表 (tblTti35zxJZzPEi)   ← J02 村巴時間表（動態讀取，唔好死記）
+│   ├── 路線 (text)
+│   ├── 公司 (select: 住戶專車)
+│   ├── 站名 (text)
+│   ├── 星期類型 (select: 工作日(Mon-Fri)/週末公假(Sat/Sun/PH))
+│   ├── 時間 (text，HHMM 逗號分隔，可多行)
+│   └── 備註 (text)
 └── 常數設定 (tbldGpfjk9ylijwU)
     ├── Item (text)
     ├── 工作名 (text)
@@ -528,6 +537,7 @@ A: HTML 頁面每 30 秒自動刷新到站時間。常用路線數據 (`favorite
 
 | 日期 | 版本 | 說明 |
 |------|------|------|
+| 2026-10-16 | v2.06 | J02: 新增住戶村巴(Shuttle/RES)——恒常時間表表動態讀取，3號站工作日93班+週末96班，HTML加RES分支計「而家之後3班」+紫色標籤；Tag預設改動態前綴匹配(上班/下班*) |
 | 2026-10-16 | v2.05 | J00: 新增B3X 新墟街市/紅橋 2條（城巴API補齊 Stop ID/方向），共19條，Tags照表原樣 |
 | 2026-10-16 | v2.04 | J00: favorites.json usage 照表原樣（下班P1/P2/大陸/荃灣 唔再normalize做「下班」），Tags 同多維表格完全ALIGN |
 | 2026-10-15 | v2.03 | J00: 補齊6條空欄位記錄(E21D美孚/S56國泰城東/S64P CL341/S52國泰城/S64 CL220/S64X CL220)，龍運S64/S64X公司更正城巴→九巴，favorites.json 17條全齊 |
@@ -542,6 +552,7 @@ A: HTML 頁面每 30 秒自動刷新到站時間。常用路線數據 (`favorite
 MIT License
 
 ## Version Control
+- v2.06 (2026-10-16): J02 住戶村巴——恒常時間表表動態讀取生成村巴條目（3號站 工作日93/週末96 班），HTML RES 分支按當日星期計「而家之後3班」（跨日補聽日頭班），companyTag res 紫色；Tag 預設改前綴動態匹配（上班/下班*）唔再死記全名
 - v2.05 (2026-10-16): 新增B3X 2條（新墟街市 003153 / 紅橋 003192，去程O），共19條
 - v2.04 (2026-10-16): favorites.json usage 照表原樣，6個Filter Tag同多維表格ALIGN（修正 normalize「下班P1/P2→下班」嘅偏差）
 - v2.03 (2026-10-15): favorites.json 補齊 6 條 NULL（政府 API 查證），龍運 S64/S64X 公司更正為九巴，17 條全齊

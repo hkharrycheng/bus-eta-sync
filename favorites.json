@@ -151,5 +151,23 @@
     "service_type": "1",
     "stopId": "18CA599721E67265",
     "dir": "O"
+  },
+  {
+    "route": "B3X",
+    "company": "CTB",
+    "stopName": "新墟街市, 屯門公路",
+    "usage": "大陸",
+    "service_type": "1",
+    "stopId": "003153",
+    "dir": "O"
+  },
+  {
+    "route": "B3X",
+    "company": "CTB",
+    "stopName": "紅橋, 屯門公路",
+    "usage": "大陸",
+    "service_type": "1",
+    "stopId": "003192",
+    "dir": "O"
   }
 ]

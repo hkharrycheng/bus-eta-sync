@@ -528,6 +528,7 @@ A: HTML 頁面每 30 秒自動刷新到站時間。常用路線數據 (`favorite
 
 | 日期 | 版本 | 說明 |
 |------|------|------|
+| 2026-10-16 | v2.04 | J00: favorites.json usage 照表原樣（下班P1/P2/大陸/荃灣 唔再normalize做「下班」），Tags 同多維表格完全ALIGN |
 | 2026-10-15 | v2.03 | J00: 補齊6條空欄位記錄(E21D美孚/S56國泰城東/S64P CL341/S52國泰城/S64 CL220/S64X CL220)，龍運S64/S64X公司更正城巴→九巴，favorites.json 17條全齊 |
 | 2026-10-09 | v2.01 | J02: 預設TOGGLE ON「上班」「下班」Tag；常用路線按Tag分組顯示；J00: 補齊4條空欄位記錄(E21/E21D/E32A)，修正favorites.json格式(駝峰命名+英文company+純數組) |
 | 2026-10-08 | v2.0 | 新增小巴支援、用法Tag篩選、預設顯示常用路線、移除Obsolete功能 |
@@ -540,5 +541,6 @@ A: HTML 頁面每 30 秒自動刷新到站時間。常用路線數據 (`favorite
 MIT License
 
 ## Version Control
+- v2.04 (2026-10-16): favorites.json usage 照表原樣，6個Filter Tag同多維表格ALIGN（修正 normalize「下班P1/P2→下班」嘅偏差）
 - v2.03 (2026-10-15): favorites.json 補齊 6 條 NULL（政府 API 查證），龍運 S64/S64X 公司更正為九巴，17 條全齊
 - v2.02 (2026-10-13): 恢復 v2.01 功能 + 重套圖標相片 LOGO（修復倒退）

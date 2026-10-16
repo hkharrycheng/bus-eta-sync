@@ -645,8 +645,8 @@ async function loadFavoritesETA() {
       for (const fav of favs) {
         try {
           let etas = [];
-          if (fav.company === 'RES') {
-            // 住戶村巴：無 API，由定時時間表計「而家之後 3 班」
+          if (fav.company === 'RES' || fav.company === 'WYT') {
+            // 住戶村巴 / 永東巴士：無 API，由定時時間表計「而家之後 3 班」
             const nowMin = now.getHours() * 60 + now.getMinutes();
             const day = now.getDay();
             const ttKey = (day === 0 || day === 6) ? '週末公假(Sat/Sun/PH)' : '工作日(Mon-Fri)';
@@ -663,9 +663,10 @@ async function loadFavoritesETA() {
               const mm = m % 1440;
               d.setDate(d.getDate() + dayShift);
               d.setHours(Math.floor(mm / 60), mm % 60, 0, 0);
-              return { eta: d.toISOString(), dest: '東涌港鐵站' };
+              const fallbackDest = fav.company === 'RES' ? '東涌港鐵站' : fav.stopName;
+              return { eta: d.toISOString(), dest: fav.dest || fallbackDest };
             });
-          } else {
+          } else if (fav.company === 'KMB' || fav.company === 'CTB' || fav.company === 'GMB') {
             let url;
             if (fav.company === 'KMB') {
               url = `${KMB_API}/eta/${fav.stopId}/${fav.route}/${fav.service_type || '1'}`;
@@ -692,10 +693,13 @@ async function loadFavoritesETA() {
               }
             }
             etas = etas.slice(0, 3);
+          } else {
+            // 無 API 公司（如永東巴士）：冇到站數據，直接顯示
+            etas = [];
           }
 
           const companyTag = fav.company === 'KMB' ? 'kmb' : (fav.company === 'CTB' ? 'ctb' : (fav.company === 'GMB' ? 'gmb' : 'res'));
-          const companyName = fav.company === 'KMB' ? '九巴' : (fav.company === 'CTB' ? '城巴' : (fav.company === 'GMB' ? '小巴' : '住戶專車'));
+          const companyName = fav.company === 'KMB' ? '九巴' : (fav.company === 'CTB' ? '城巴' : (fav.company === 'GMB' ? '小巴' : (fav.company === 'WYT' ? '永東巴士' : fav.company)));
 
           if (etas.length === 0) {
             html += `

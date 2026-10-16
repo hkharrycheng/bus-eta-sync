@@ -90,6 +90,7 @@
   .fav-company-tag.kmb { background: #d40000; color: white; }
   .fav-company-tag.ctb { background: #f5a623; color: #000; }
   .fav-company-tag.gmb { background: #2da44e; color: white; }
+  .fav-company-tag.res { background: #8250df; color: white; }
   .fav-route {
     font-size: 18px;
     font-weight: 700;
@@ -542,8 +543,8 @@ function initTagFilter() {
   }
   allTags = Array.from(tagSet);
   // 預設只 TOGGLE ON "上班"同"下班" Tag，其他 Tag 預設隱藏
-  const DEFAULT_TAGS = ['上班', '下班'];
-  activeTags = new Set(allTags.filter(tag => DEFAULT_TAGS.includes(tag)));
+  const DEFAULT_TAG_PREFIXES = ['上班', '下班']; // 預設開啟嘅 Tag 前綴（動態匹配，唔死記全名）
+  activeTags = new Set(allTags.filter(tag => DEFAULT_TAG_PREFIXES.some(p => tag === p || tag.startsWith(p))));
 
   renderTagFilter();
 }
@@ -643,36 +644,58 @@ async function loadFavoritesETA() {
 
       for (const fav of favs) {
         try {
-          let url;
-          if (fav.company === 'KMB') {
-            url = `${KMB_API}/eta/${fav.stopId}/${fav.route}/${fav.service_type || '1'}`;
-          } else if (fav.company === 'CTB') {
-            url = `${CTB_BATCH_API}/stop-eta/CTB/${fav.stopId}`;
-          } else if (fav.company === 'GMB') {
-            url = `${GMB_API}/eta/stop/${fav.stopId}`;
-          }
-
-          const res = await fetch(url);
-          const data = await res.json();
-
           let etas = [];
-          if (fav.company === 'KMB') {
-            // 九巴：按方向過濾
-            etas = (data.data || []).filter(e => e.eta && e.dir === fav.dir);
-          } else if (fav.company === 'CTB') {
-            etas = (data.data || []).filter(e => e.eta && e.route === fav.route && e.dir === fav.dir);
-          } else if (fav.company === 'GMB') {
-            // 小巴 API：data.data 是數組，每個元素包含 eta 數組
-            for (const item of (data.data || [])) {
-              if (item.eta && Array.isArray(item.eta)) {
-                etas = etas.concat(item.eta);
+          if (fav.company === 'RES') {
+            // 住戶村巴：無 API，由定時時間表計「而家之後 3 班」
+            const nowMin = now.getHours() * 60 + now.getMinutes();
+            const day = now.getDay();
+            const ttKey = (day === 0 || day === 6) ? '週末公假(Sat/Sun/PH)' : '工作日(Mon-Fri)';
+            const tt = (fav.timetable || {})[ttKey] || [];
+            const mins = tt.map(t => parseInt(t.slice(0, 2), 10) * 60 + parseInt(t.slice(2, 4), 10)).sort((a, b) => a - b);
+            let upcoming = mins.filter(m => m >= nowMin).slice(0, 3);
+            if (upcoming.length < 3) {
+              // 跨日：補埋聽日頭班
+              upcoming = upcoming.concat(mins.slice(0, 3 - upcoming.length).map(m => m + 1440));
+            }
+            etas = upcoming.map(m => {
+              const d = new Date(now.getTime());
+              const dayShift = Math.floor(m / 1440);
+              const mm = m % 1440;
+              d.setDate(d.getDate() + dayShift);
+              d.setHours(Math.floor(mm / 60), mm % 60, 0, 0);
+              return { eta: d.toISOString(), dest: '東涌港鐵站' };
+            });
+          } else {
+            let url;
+            if (fav.company === 'KMB') {
+              url = `${KMB_API}/eta/${fav.stopId}/${fav.route}/${fav.service_type || '1'}`;
+            } else if (fav.company === 'CTB') {
+              url = `${CTB_BATCH_API}/stop-eta/CTB/${fav.stopId}`;
+            } else if (fav.company === 'GMB') {
+              url = `${GMB_API}/eta/stop/${fav.stopId}`;
+            }
+
+            const res = await fetch(url);
+            const data = await res.json();
+
+            if (fav.company === 'KMB') {
+              // 九巴：按方向過濾
+              etas = (data.data || []).filter(e => e.eta && e.dir === fav.dir);
+            } else if (fav.company === 'CTB') {
+              etas = (data.data || []).filter(e => e.eta && e.route === fav.route && e.dir === fav.dir);
+            } else if (fav.company === 'GMB') {
+              // 小巴 API：data.data 是數組，每個元素包含 eta 數組
+              for (const item of (data.data || [])) {
+                if (item.eta && Array.isArray(item.eta)) {
+                  etas = etas.concat(item.eta);
+                }
               }
             }
+            etas = etas.slice(0, 3);
           }
-          etas = etas.slice(0, 3);
 
-          const companyTag = fav.company === 'KMB' ? 'kmb' : (fav.company === 'CTB' ? 'ctb' : 'gmb');
-          const companyName = fav.company === 'KMB' ? '九巴' : (fav.company === 'CTB' ? '城巴' : '小巴');
+          const companyTag = fav.company === 'KMB' ? 'kmb' : (fav.company === 'CTB' ? 'ctb' : (fav.company === 'GMB' ? 'gmb' : 'res'));
+          const companyName = fav.company === 'KMB' ? '九巴' : (fav.company === 'CTB' ? '城巴' : (fav.company === 'GMB' ? '小巴' : '住戶專車'));
 
           if (etas.length === 0) {
             html += `
@@ -1103,6 +1126,6 @@ async function loadETA(index) {
 </script>
 
 <footer style="text-align:center; padding:20px; color:#888; font-size:12px; border-top:1px solid #333; margin-top:30px;">
-  HIS Tools © 2026.1.02
+  HIS Tools © 2026.1.06
 </footer></body>
 </html>

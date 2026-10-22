@@ -542,9 +542,8 @@ function initTagFilter() {
     }
   }
   allTags = Array.from(tagSet);
-  // 預設只 TOGGLE ON "上班"同"下班" Tag，其他 Tag 預設隱藏
-  const DEFAULT_TAG_PREFIXES = ['上班', '下班']; // 預設開啟嘅 Tag 前綴（動態匹配，唔死記全名）
-  activeTags = new Set(allTags.filter(tag => DEFAULT_TAG_PREFIXES.some(p => tag === p || tag.startsWith(p))));
+  // 預設唔開任何 Tag、唔顯示任何巴士線——用戶自己揀（揀咗先顯示對應路線）
+  activeTags = new Set();
 
   renderTagFilter();
 }
@@ -616,7 +615,8 @@ async function loadFavoritesETA() {
     // 按 Tag 分組
     const groups = new Map();
     for (const fav of FAVORITES) {
-      // Tag 篩選：如果有 usage 且唔在 activeTags 中，跳過
+      // Tag 篩選：預設（activeTags 空）唔顯示任何路線；揀咗 Tag 先顯示所選群組＋無 Tag 路線
+      if (activeTags.size === 0) continue;
       if (fav.usage && !activeTags.has(fav.usage)) {
         continue;
       }
